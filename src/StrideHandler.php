@@ -48,24 +48,37 @@ class StrideHandler implements HandlerInterface
      */
     public function notify(MessageInterface $message)
     {
-        $request = $this->client->request(
-            'POST',
-            strtr(self::URL, [
-                '{cloudId}' => $this->cloudId,
-                '{roomId}' => $message->getRoom()->getIdentifier(),
-            ]),
-            [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Authorization' => strtr('Bearer {token}', [
-                        '{token}' => $this->token,
-                    ]),
-                ],
-                'body' => json_encode($this->getContent($message)),
-            ]
-        );
+        if (false === $message->getRoom() instanceof StrideRoom) {
+            return false;
+        }
 
-        $this->client->sendRequest($request);
+        try {
+            $request = $this->client->request(
+                'POST',
+                strtr(self::URL, [
+                    '{cloudId}' => $this->cloudId,
+                    '{roomId}' => $message->getRoom()->getIdentifier(),
+                ]),
+                [
+                    'headers' => [
+                        'Content-Type' => 'application/json',
+                        'Authorization' => strtr('Bearer {token}', [
+                            '{token}' => $this->token,
+                        ]),
+                    ],
+                ],
+                json_encode($this->getContent($message))
+            );
+
+            $response = $this->client->sendRequest($request);
+
+            echo $response->getBody();
+        } catch (\Exception $e) {
+            echo $e->getResponse()->getBody();
+            echo $e->getMessage();
+        }
+
+        return true;
     }
 
     /**
