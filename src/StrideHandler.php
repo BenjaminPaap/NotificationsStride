@@ -52,31 +52,30 @@ class StrideHandler implements HandlerInterface
             return false;
         }
 
-        try {
-            $request = $this->client->request(
-                'POST',
-                strtr(self::URL, [
-                    '{cloudId}' => $this->cloudId,
-                    '{roomId}' => $message->getRoom()->getIdentifier(),
-                ]),
-                [
-                    'headers' => [
-                        'Content-Type' => 'application/json',
-                        'Authorization' => strtr('Bearer {token}', [
-                            '{token}' => $this->token,
-                        ]),
-                    ],
-                ],
-                json_encode($this->getContent($message))
-            );
+        $body = json_encode($this->getContent($message));
 
-            $response = $this->client->sendRequest($request);
-
-            echo $response->getBody();
-        } catch (\Exception $e) {
-            echo $e->getResponse()->getBody();
-            echo $e->getMessage();
+        if (json_last_error() != JSON_ERROR_NONE) {
+            throw new \Exception(json_last_error_msg());
         }
+
+        $request = $this->client->request(
+            'POST',
+            strtr(self::URL, [
+                '{cloudId}' => $this->cloudId,
+                '{roomId}' => $message->getRoom()->getIdentifier(),
+            ]),
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => strtr('Bearer {token}', [
+                        '{token}' => $this->token,
+                    ]),
+                ],
+                'body' => $body,
+            ]
+        );
+
+        $response = $this->client->sendRequest($request);
 
         return true;
     }
