@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "bpa/notifications": "dev-master",
+        "bpa/notifications": "^1.0",
         "guzzlehttp/guzzle": "~6.0"
     },
     "autoload": {
