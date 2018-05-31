@@ -58,7 +58,7 @@ class StrideHandler implements HandlerInterface
             throw new \Exception(json_last_error_msg());
         }
 
-        $request = $this->client->request(
+        $response = $this->client->request(
             'POST',
             strtr(self::URL, [
                 '{cloudId}' => $this->cloudId,
@@ -75,9 +75,11 @@ class StrideHandler implements HandlerInterface
             ]
         );
 
-        $response = $this->client->sendRequest($request);
-
-        return true;
+        if ($response->getStatusCode() == 200) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
